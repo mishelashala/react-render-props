@@ -5,7 +5,6 @@ function DeleteUserModal({ onClickCancel, onClickAccept }) {
   return (
     <Modal
       header={<ModalHeader title="Delete user" />}
-      content={<div className="modal__content">Dude, are you serious?</div>}
       footer={
         <ModalFooter
           cancelButtonText="Never mind"
@@ -14,7 +13,9 @@ function DeleteUserModal({ onClickCancel, onClickAccept }) {
           onClickAccept={onClickAccept}
         />
       }
-    />
+    >
+      <div className="modal__content">Dude, are you serious?</div>
+    </Modal>
   );
 }
 
@@ -38,12 +39,12 @@ function ConfirmDeleteUserModal({ onClickClose, onClickAccept }) {
   );
 }
 
-function Modal({ header, content, footer }) {
+function Modal({ header, children, footer }) {
   return (
     <section className="modal">
       <div className="modal__container">
         {header}
-        {content}
+        {children}
         {footer}
       </div>
     </section>
@@ -57,7 +58,7 @@ function ModalHeader({ title, hasCloseButton, onClickClose = noop }) {
     <header className="between">
       <h2>{title}</h2>
       {hasCloseButton && (
-        <a onClick={onClickClose} href="#">
+        <a onClick={onClickClose} href="/#">
           x
         </a>
       )}
