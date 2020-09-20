@@ -1,14 +1,31 @@
 import React, { useState } from "react";
 import "./App.css";
 
+function noop() {}
+
+export function ModalHeader({ title, hasCloseButton, onClickClose = noop }) {
+  return (
+    <header className="modal__header between">
+      <h2>{title}</h2>
+      {hasCloseButton && (
+        <a onClick={onClickClose} href="/#">
+          x
+        </a>
+      )}
+    </header>
+  );
+}
+
 function DeleteUserModal({ onClickCancel, onClickAccept }) {
   return (
     <Modal
       header={<ModalHeader title="Delete user" />}
       footer={
         <ModalFooter
-          cancelButtonText="Never mind"
+          acceptButtonId="delete-modal-confirm-btn"
           acceptButtonText="Delete"
+          cancelButtonId="delete-modal-cacel-btn"
+          cancelButtonText="Never mind"
           onClickCancel={onClickCancel}
           onClickAccept={onClickAccept}
         />
@@ -31,6 +48,7 @@ function ConfirmDeleteUserModal({ onClickClose, onClickAccept }) {
       }
       footer={
         <ModalFooter
+          acceptButtonId="confirm-modal-delete-btn"
           acceptButtonText="Ok then..."
           onClickAccept={onClickAccept}
         />
@@ -39,7 +57,7 @@ function ConfirmDeleteUserModal({ onClickClose, onClickAccept }) {
   );
 }
 
-function Modal({ header, children, footer }) {
+export function Modal({ header, children, footer }) {
   return (
     <section className="modal">
       <div className="modal__container">
@@ -51,40 +69,69 @@ function Modal({ header, children, footer }) {
   );
 }
 
-function noop() {}
-
-function ModalHeader({ title, hasCloseButton, onClickClose = noop }) {
-  return (
-    <header className="between">
-      <h2>{title}</h2>
-      {hasCloseButton && (
-        <a onClick={onClickClose} href="/#">
-          x
-        </a>
-      )}
-    </header>
-  );
-}
-
 function ModalFooter({
-  cancelButtonText,
+  acceptButtonId,
   acceptButtonText,
+  cancelButtonId,
+  cancelButtonText,
   onClickCancel,
   onClickAccept,
 }) {
   return (
     <footer>
       {cancelButtonText && cancelButtonText.length && (
-        <button onClick={onClickCancel}>{cancelButtonText}</button>
+        <button id={cancelButtonId} onClick={onClickCancel}>
+          {cancelButtonText}
+        </button>
       )}
-      <button data-danger="true" onClick={onClickAccept}>
+      <button id={acceptButtonId} data-danger="true" onClick={onClickAccept}>
         {acceptButtonText}
       </button>
     </footer>
   );
 }
 
-function App() {
+export function UserList({
+  users,
+  isDeleteModalOpen,
+  isConfirmation,
+  onClickDeleteUser,
+  onClickCancel,
+  onClickDelete,
+  onClickConfirmDelete,
+}) {
+  return (
+    <div>
+      {Object.keys(users).map((userId) => (
+        <div className="user-item" key={userId}>
+          Name: {users[userId].name}
+          <button
+            id={`delete-user-${userId}-btn`}
+            onClick={onClickDeleteUser(userId)}
+          >
+            Delete
+          </button>
+        </div>
+      ))}
+
+      {isDeleteModalOpen && !isConfirmation && (
+        <DeleteUserModal
+          onClickCancel={onClickCancel}
+          onClickAccept={onClickDelete}
+        />
+      )}
+
+      {isDeleteModalOpen && isConfirmation && (
+        <ConfirmDeleteUserModal
+          onClickClose={onClickCancel}
+          onClickAccept={onClickConfirmDelete}
+        />
+      )}
+    </div>
+  );
+}
+
+export function App() {
   const [users, setUsers] = useState({
     1: { id: 1, name: "John Doe" },
     2: { id: 2, name: "jenny doe" },
@@ -117,28 +164,15 @@ function App() {
   };
 
   return (
-    <div>
-      {Object.keys(users).map((userId) => (
-        <div key={userId}>
-          Name: {users[userId].name}
-          <button onClick={handleClickDeleteUser(userId)}>Delete</button>
-        </div>
-      ))}
-
-      {isDeleteModalOpen && !isConfirmation && (
-        <DeleteUserModal
-          onClickCancel={handleClickCancel}
-          onClickAccept={handleClickDelete}
-        />
-      )}
-
-      {isDeleteModalOpen && isConfirmation && (
-        <ConfirmDeleteUserModal
-          onClickClose={handleClickCancel}
-          onClickAccept={handleClickConfirmDelete}
-        />
-      )}
-    </div>
+    <UserList
+      users={users}
+      isDeleteModalOpen={isDeleteModalOpen}
+      isConfirmation={isConfirmation}
+      onClickDeleteUser={handleClickDeleteUser}
+      onClickCancel={handleClickCancel}
+      onClickDelete={handleClickDelete}
+      onClickConfirmDelete={handleClickConfirmDelete}
+    />
   );
 }
 
